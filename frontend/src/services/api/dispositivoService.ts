@@ -1,7 +1,7 @@
 // src/services/api/dispositivoService.ts
 import { IDispositivo, IDispositivoData } from "@/types/Dispositivo";
 
-const API_BASE_URL = 'http://localhost:3333';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3333';
 
 class DispositivoApiService {
   private baseUrl: string;

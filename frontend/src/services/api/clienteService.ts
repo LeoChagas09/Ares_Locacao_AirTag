@@ -1,7 +1,7 @@
 // src/services/api/clienteService.ts
 import { ICliente, IClienteData } from "@/types/Cliente";
 
-const API_BASE_URL = 'http://localhost:3333'; // A URL do nosso backend
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3333'; // A URL do nosso backend
 
 // Classe de Serviço para encapsular a lógica da API
 class ClienteApiService {

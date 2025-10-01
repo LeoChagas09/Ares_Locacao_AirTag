@@ -1,7 +1,7 @@
 // src/services/api/locacaoService.ts
 import { ILocacao } from "@/types/Locacao";
 
-const API_BASE_URL = 'http://localhost:3333';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3333';
 
 class LocacaoApiService {
   private baseUrl: string = `${API_BASE_URL}/locacoes`;

@@ -1,0 +1,62 @@
+# Teste Ares/docker-compose.yml
+
+version: '3.8'
+
+services:
+  # Serviço do Banco de Dados PostgreSQL
+  db:
+    image: postgres:13-alpine
+    container_name: ares_db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=teste_ares
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ares-network
+
+  # Serviço do Backend (API)
+  backend:
+    container_name: ares_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3333:3333"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:admin@db:5432/teste_ares
+      - PORT=3333
+    command: >
+      sh -c "npx prisma migrate deploy && npm run start"
+    networks:
+      - ares-network
+
+  # Serviço do Frontend (Next.js)
+  frontend:
+    container_name: ares_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_BASE_URL=http://backend:3333
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - ares-network
+
+# Volumes para persistência de dados
+volumes:
+  postgres_data:
+
+# Rede para comunicação entre os contêineres
+networks:
+  ares-network:
+    driver: bridge
