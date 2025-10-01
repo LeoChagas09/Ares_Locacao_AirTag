@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo para o Cliente
+model Cliente {
+  id_cliente String    @id @db.VarChar(32)
+  nome       String    @db.VarChar(255)
+  email      String    @unique @db.VarChar(255) // O email de cada cliente deve ser único
+  locacoes   Locacao[] // Um cliente pode ter várias locações
+}
+
+// Modelo para o Dispositivo (AirTag)
+model Dispositivo {
+  id_dispositivo String    @id @db.VarChar(32)
+  nome           String    @db.VarChar(255)
+  macAddress     String    @unique @db.VarChar(255) // O MAC Address de cada dispositivo é único
+  locacoes       Locacao[] // Um dispositivo pode estar em várias locações (mas não ao mesmo tempo)
+}
+
+// Modelo para a Locação (vínculo entre Cliente e Dispositivo)
+model Locacao {
+  id_locacao String    @id @db.VarChar(32)
+  dataInicio DateTime  @default(now()) // Data em que a locação começou
+  dataFim    DateTime? // Data em que a locação terminou. O '?' indica que é opcional (nulo enquanto estiver ativa)
+  custoTotal Float? // Custo final da locação. Opcional também.
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id_cliente])
+
+  dispositivoId String
+  dispositivo   Dispositivo @relation(fields: [dispositivoId], references: [id_dispositivo])
+}
