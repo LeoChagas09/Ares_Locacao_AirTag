@@ -26,7 +26,6 @@ O **Ares** é um sistema de gestão desenvolvido para facilitar o controle de lo
 - **React 19** com TypeScript
 - **Material-UI (MUI)** para interface visual
 - **React Hook Form** para gerenciamento de formulários
-- **React Toastify** para notificações
 
 #### Infraestrutura
 - **Docker** e **Docker Compose** para containerização
@@ -146,8 +145,7 @@ docker compose exec backend bash
 ### Gestão de Dispositivos
 - ✅ Cadastro de AirTags
 - ✅ Controle por MAC Address único
-- ✅ Status de disponibilidade
-- ✅ Histórico de locações
+- ✅ Listagem com busca e filtros
 
 ### Gestão de Locações
 - ✅ Criação de novas locações
@@ -254,8 +252,6 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3333
 ### Locações
 - `GET /locacoes` - Listar todas as locações
 - `POST /locacoes` - Criar nova locação
-- `PUT /locacoes/:id` - Atualizar locação
-- `DELETE /locacoes/:id` - Remover locação
 - `PUT /locacoes/:id/finalizar` - Finalizar locação
 
 ## 🛡️ Tratamento de Erros

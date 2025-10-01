@@ -13,7 +13,6 @@ import {
   Container,
   alpha,
   Fade,
-  Chip,
   Card,
   CardContent,
   CardActions,
@@ -27,7 +26,9 @@ import {
   Snackbar,
   Alert,
   Pagination,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import { IDispositivo } from '@/types/Dispositivo';
 import dispositivoService from '@/services/api/dispositivoService';
@@ -39,7 +40,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DevicesIcon from '@mui/icons-material/Devices';
 import RouterIcon from '@mui/icons-material/Router';
 import WarningIcon from '@mui/icons-material/Warning';
-import MemoryIcon from '@mui/icons-material/Memory';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
 export default function DispositivosPage() {
   const [dispositivos, setDispositivos] = useState<IDispositivo[]>([]);
@@ -48,6 +50,7 @@ export default function DispositivosPage() {
   const [loading, setLoading] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [dispositivoToDelete, setDispositivoToDelete] = useState<IDispositivo | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
   // Estados para paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,15 +76,30 @@ export default function DispositivosPage() {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  // Funções de paginação
-  const totalPages = Math.ceil(dispositivos.length / itemsPerPage);
+  // Funções de paginação e filtro
+  const filteredDispositivos = dispositivos.filter(dispositivo =>
+    dispositivo.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    dispositivo.macAddress.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const totalPages = Math.ceil(filteredDispositivos.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentDispositivos = dispositivos.slice(startIndex, endIndex);
+  const currentDispositivos = filteredDispositivos.slice(startIndex, endIndex);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset para primeira página quando buscar
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setCurrentPage(1);
   };
 
   const resetPagination = () => {
@@ -281,60 +299,134 @@ export default function DispositivosPage() {
           <Paper 
             elevation={0}
             sx={{ 
-              p: 4, 
-              mb: 4, 
+              p: { xs: 3, sm: 4 }, 
+              mb: { xs: 3, sm: 4 }, 
               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               color: 'white',
               borderRadius: 3
             }}
           >
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+            <Stack 
+              direction={{ xs: 'column', sm: 'row' }} 
+              justifyContent="space-between" 
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+              spacing={{ xs: 3, sm: 2 }}
+            >
+              <Box sx={{ textAlign: { xs: 'center', sm: 'left' }, width: { xs: '100%', sm: 'auto' } }}>
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    fontWeight: 700, 
+                    mb: 1,
+                    fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' }
+                  }}
+                >
                   Controle de Dispositivos
                 </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.9, mb: 1 }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    opacity: 0.9,
+                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                  }}
+                >
                   Monitore e gerencie todos os dispositivos disponíveis
                 </Typography>
-                {dispositivos.length > 0 && (
-                  <Stack direction="row" spacing={2} alignItems="center" sx={{ opacity: 0.8 }}>
-                    <Typography variant="body2">
-                      Total: {dispositivos.length} dispositivo{dispositivos.length !== 1 ? 's' : ''}
-                    </Typography>
-                    <Typography variant="body2">•</Typography>
-                    <Typography variant="body2">
-                      Página {currentPage} de {totalPages}
-                    </Typography>
-                  </Stack>
-                )}
               </Box>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={() => handleOpenModal()}
-                size="large"
                 sx={{
                   background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   color: 'white',
                   fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  borderRadius: 2,
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  px: { xs: 3, sm: 4 },
+                  py: { xs: 1.2, sm: 1.5 },
+                  borderRadius: 3,
+                  textTransform: 'none',
+                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+                  border: '2px solid rgba(255,255,255,0.2)',
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  minWidth: { xs: '100%', sm: 200 },
                   '&:hover': {
                     background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(16, 185, 129, 0.4)',
+                    boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)',
+                    border: '2px solid rgba(255,255,255,0.3)',
                   },
-                  transition: 'all 0.3s ease',
-                  minWidth: 200
+                  transition: 'all 0.3s ease-in-out',
                 }}
               >
                 Novo Dispositivo
               </Button>
             </Stack>
           </Paper>
+
+          {/* Barra de Pesquisa */}
+          {dispositivos.length > 0 && (
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: { xs: 2, sm: 3 }, 
+                mb: { xs: 3, sm: 4 }, 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 3
+              }}
+            >
+              <TextField
+                fullWidth
+                placeholder="Buscar por nome ou MAC address..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchTerm && (
+                    <InputAdornment position="end">
+                      <IconButton 
+                        onClick={clearSearch}
+                        size="small"
+                        sx={{ color: 'text.secondary' }}
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'divider',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'success.main',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'success.main',
+                    }
+                  }
+                }}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    fontSize: '1rem',
+                    py: 1.5
+                  }
+                }}
+              />
+              {searchTerm && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                  {filteredDispositivos.length === 0 
+                    ? 'Nenhum dispositivo encontrado para sua busca' 
+                    : `${filteredDispositivos.length} dispositivo${filteredDispositivos.length !== 1 ? 's' : ''} encontrado${filteredDispositivos.length !== 1 ? 's' : ''}`
+                  }
+                </Typography>
+              )}
+            </Paper>
+          )}
 
           {/* Cards dos Dispositivos */}
           <Box>
@@ -382,6 +474,50 @@ export default function DispositivosPage() {
                   Adicionar Dispositivo
                 </Button>
               </Paper>
+            ) : filteredDispositivos.length === 0 ? (
+              <Paper 
+                elevation={0}
+                sx={{
+                  p: 8,
+                  textAlign: 'center',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 3,
+                  bgcolor: 'background.paper'
+                }}
+              >
+                <Avatar 
+                  sx={{ 
+                    bgcolor: alpha('#6b7280', 0.1), 
+                    color: '#6b7280',
+                    width: 64, 
+                    height: 64,
+                    mx: 'auto',
+                    mb: 2
+                  }}
+                >
+                  <SearchIcon sx={{ fontSize: '2rem' }} />
+                </Avatar>
+                <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                  Nenhum dispositivo encontrado
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Tente ajustar os termos de busca ou limpe o filtro para ver todos os dispositivos
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={clearSearch}
+                  sx={{
+                    borderColor: 'success.main',
+                    color: 'success.main',
+                    '&:hover': {
+                      bgcolor: alpha('#10b981', 0.1),
+                    }
+                  }}
+                >
+                  Limpar Filtro
+                </Button>
+              </Paper>
             ) : (
               <Box>
                 {/* Lista de Dispositivos */}
@@ -406,7 +542,8 @@ export default function DispositivosPage() {
                   >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Typography variant="body2" color="text.secondary">
-                        Mostrando {startIndex + 1}-{Math.min(endIndex, dispositivos.length)} de {dispositivos.length} dispositivos
+                        Mostrando {startIndex + 1}-{Math.min(endIndex, filteredDispositivos.length)} de {filteredDispositivos.length} dispositivos
+                        {searchTerm && ` (filtrados de ${dispositivos.length} total)`}
                       </Typography>
                     </Stack>
                     

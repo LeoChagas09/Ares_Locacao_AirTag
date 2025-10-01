@@ -22,11 +22,12 @@ import {
   Card,
   CardContent,
   CardActions,
-  Chip,
   Snackbar,
   Alert,
   Pagination,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import { ICliente } from '@/types/Cliente';
 import clienteService from '@/services/api/clienteService';
@@ -38,6 +39,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PersonIcon from '@mui/icons-material/Person';
 import WarningIcon from '@mui/icons-material/Warning';
 import EmailIcon from '@mui/icons-material/Email';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<ICliente[]>([]);
@@ -46,6 +49,7 @@ export default function ClientesPage() {
   const [loading, setLoading] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [clienteToDelete, setClienteToDelete] = useState<ICliente | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
   // Estados para paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,16 +75,31 @@ export default function ClientesPage() {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  // Funções de paginação
-  const totalPages = Math.ceil(clientes.length / itemsPerPage);
+  // Funções de paginação e filtro
+  const filteredClientes = clientes.filter(cliente =>
+    cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const totalPages = Math.ceil(filteredClientes.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentClientes = clientes.slice(startIndex, endIndex);
+  const currentClientes = filteredClientes.slice(startIndex, endIndex);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
     setCurrentPage(page);
     // Scroll suave para o topo da lista
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset para primeira página quando buscar
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setCurrentPage(1);
   };
 
   // Reset paginação quando clientes mudarem
@@ -173,10 +192,12 @@ export default function ClientesPage() {
           borderColor: 'divider',
           borderRadius: 3,
           transition: 'all 0.3s ease',
-          '&:hover': {
-            borderColor: 'primary.main',
-            boxShadow: '0 8px 25px rgba(37, 99, 235, 0.15)',
-            transform: 'translateY(-4px)',
+          '@media (hover: hover)': {
+            '&:hover': {
+              borderColor: 'primary.main',
+              boxShadow: '0 8px 25px rgba(37, 99, 235, 0.15)',
+              transform: 'translateY(-4px)',
+            }
           }
         }}
       >
@@ -194,11 +215,23 @@ export default function ClientesPage() {
               >
                 <PersonIcon />
               </Avatar>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" fontWeight={700} color="text.primary" noWrap>
-                  {cliente.nome}
-                </Typography>
-                
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Tooltip 
+                  title={cliente.nome} 
+                  arrow 
+                  placement="top"
+                  enterDelay={500}
+                >
+                  <Typography 
+                    variant="h6" 
+                    fontWeight={700} 
+                    color="text.primary" 
+                    noWrap
+                    sx={{ cursor: 'help' }}
+                  >
+                    {cliente.nome}
+                  </Typography>
+                </Tooltip>
               </Box>
             </Stack>
             
@@ -208,13 +241,25 @@ export default function ClientesPage() {
                 <Avatar sx={{ bgcolor: alpha('#f59e0b', 0.1), color: '#f59e0b', width: 32, height: 32 }}>
                   <EmailIcon sx={{ fontSize: '1rem' }} />
                 </Avatar>
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" fontWeight={600} color="text.primary">
                     E-mail
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" noWrap>
-                    {cliente.email}
-                  </Typography>
+                  <Tooltip 
+                    title={cliente.email} 
+                    arrow 
+                    placement="bottom"
+                    enterDelay={500}
+                  >
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      noWrap
+                      sx={{ cursor: 'help' }}
+                    >
+                      {cliente.email}
+                    </Typography>
+                  </Tooltip>
                 </Box>
               </Stack>
             </Stack>
@@ -222,7 +267,7 @@ export default function ClientesPage() {
         </CardContent>
         
         <CardActions sx={{ p: 3, pt: 0, justifyContent: 'flex-end' }}>
-          <Tooltip title="Editar cliente">
+          <Tooltip title="Editar cliente" arrow>
             <IconButton
               onClick={() => handleOpenModal(cliente)}
               sx={{
@@ -241,7 +286,7 @@ export default function ClientesPage() {
               <EditIcon sx={{ fontSize: '1.1rem' }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Excluir cliente">
+          <Tooltip title="Excluir cliente" arrow>
             <IconButton
               onClick={() => handleDelete(cliente.id_cliente)}
               sx={{
@@ -275,15 +320,15 @@ export default function ClientesPage() {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
       <Fade in={true} timeout={600}>
         <Box>
           {/* Header */}
           <Paper 
             elevation={0}
             sx={{ 
-              p: 4, 
-              mb: 4, 
+              p: { xs: 3, sm: 4 }, 
+              mb: { xs: 3, sm: 4 }, 
               background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
               color: 'white',
               borderRadius: 3
@@ -293,48 +338,52 @@ export default function ClientesPage() {
               direction={{ xs: 'column', sm: 'row' }} 
               justifyContent="space-between" 
               alignItems={{ xs: 'flex-start', sm: 'center' }}
-              spacing={3}
+              spacing={{ xs: 3, sm: 2 }}
             >
-              <Box sx={{ textAlign: { xs: 'center', sm: 'left' }, width: '100%' }}>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              <Box sx={{ textAlign: { xs: 'center', sm: 'left' }, width: { xs: '100%', sm: 'auto' } }}>
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    fontWeight: 700, 
+                    mb: 1,
+                    fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' }
+                  }}
+                >
                   Gestão de Clientes
                 </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.9, mb: 1 }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    opacity: 0.9,
+                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                  }}
+                >
                   Gerencie todos os seus clientes em um só lugar
                 </Typography>
-                {clientes.length > 0 && (
-                  <Stack direction="row" spacing={2} alignItems="center" sx={{ opacity: 0.8 }}>
-                    <Typography variant="body2">
-                      Total: {clientes.length} cliente{clientes.length !== 1 ? 's' : ''}
-                    </Typography>
-                    <Typography variant="body2">•</Typography>
-                    <Typography variant="body2">
-                      Página {currentPage} de {totalPages}
-                    </Typography>
-                  </Stack>
-                )}
               </Box>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={() => handleOpenModal()}
-                size="large"
                 sx={{
-                  bgcolor: '#f59e0b',
+                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                   color: 'white',
                   fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  borderRadius: 2,
-                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                  px: { xs: 3, sm: 4 },
+                  py: { xs: 1.2, sm: 1.5 },
+                  borderRadius: 3,
+                  textTransform: 'none',
+                  boxShadow: '0 4px 15px rgba(37, 99, 235, 0.3)',
+                  border: '2px solid rgba(255,255,255,0.2)',
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  minWidth: { xs: '100%', sm: 200 },
                   '&:hover': {
-                    bgcolor: '#d97706',
+                    background: 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(245, 158, 11, 0.4)',
+                    boxShadow: '0 8px 25px rgba(37, 99, 235, 0.4)',
+                    border: '2px solid rgba(255,255,255,0.3)',
                   },
-                  transition: 'all 0.3s ease',
-                  minWidth: 200
+                  transition: 'all 0.3s ease-in-out',
                 }}
               >
                 Novo Cliente
@@ -342,7 +391,70 @@ export default function ClientesPage() {
             </Stack>
           </Paper>
 
-
+          {/* Barra de Pesquisa */}
+          {clientes.length > 0 && (
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: { xs: 2, sm: 3 }, 
+                mb: { xs: 3, sm: 4 }, 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 3
+              }}
+            >
+              <TextField
+                fullWidth
+                placeholder="Buscar por nome ou email..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchTerm && (
+                    <InputAdornment position="end">
+                      <IconButton 
+                        onClick={clearSearch}
+                        size="small"
+                        sx={{ color: 'text.secondary' }}
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'divider',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'primary.main',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'primary.main',
+                    }
+                  }
+                }}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    fontSize: '1rem',
+                    py: 1.5
+                  }
+                }}
+              />
+              {searchTerm && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                  {filteredClientes.length === 0 
+                    ? 'Nenhum cliente encontrado para sua busca' 
+                    : `${filteredClientes.length} cliente${filteredClientes.length !== 1 ? 's' : ''} encontrado${filteredClientes.length !== 1 ? 's' : ''}`
+                  }
+                </Typography>
+              )}
+            </Paper>
+          )}
 
           {/* Cards dos Clientes */}
           <Box>
@@ -390,6 +502,50 @@ export default function ClientesPage() {
                   Adicionar Cliente
                 </Button>
               </Paper>
+            ) : filteredClientes.length === 0 ? (
+              <Paper 
+                elevation={0}
+                sx={{
+                  p: 8,
+                  textAlign: 'center',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 3,
+                  bgcolor: 'background.paper'
+                }}
+              >
+                <Avatar 
+                  sx={{ 
+                    bgcolor: alpha('#6b7280', 0.1), 
+                    color: '#6b7280',
+                    width: 64, 
+                    height: 64,
+                    mx: 'auto',
+                    mb: 2
+                  }}
+                >
+                  <SearchIcon sx={{ fontSize: '2rem' }} />
+                </Avatar>
+                <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                  Nenhum cliente encontrado
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Tente ajustar os termos de busca ou limpe o filtro para ver todos os clientes
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={clearSearch}
+                  sx={{
+                    borderColor: 'primary.main',
+                    color: 'primary.main',
+                    '&:hover': {
+                      bgcolor: alpha('#2563eb', 0.1),
+                    }
+                  }}
+                >
+                  Limpar Filtro
+                </Button>
+              </Paper>
             ) : (
               <Box>
                 {/* Lista de Clientes */}
@@ -414,7 +570,8 @@ export default function ClientesPage() {
                   >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Typography variant="body2" color="text.secondary">
-                        Mostrando {startIndex + 1}-{Math.min(endIndex, clientes.length)} de {clientes.length} clientes
+                        Mostrando {startIndex + 1}-{Math.min(endIndex, filteredClientes.length)} de {filteredClientes.length} clientes
+                        {searchTerm && ` (filtrados de ${clientes.length} total)`}
                       </Typography>
                     </Stack>
                     
