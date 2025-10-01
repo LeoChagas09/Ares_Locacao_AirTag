@@ -1433,30 +1433,16 @@ export default function LocacoesPage() {
           </Dialog>
           
           {/* Snackbar para notificações */}
-          <Snackbar
-            open={snackbar.open}
-            autoHideDuration={4000}
+          <Snackbar 
+            open={snackbar.open} 
+            autoHideDuration={4000} 
             onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           >
             <Alert 
               onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
-              severity={snackbar.severity}
-              variant="filled"
-              sx={{ 
-                width: '100%',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              }}
-              action={
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  color="inherit"
-                  onClick={() => setSnackbar(prev => ({ ...prev, open: false }))}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              }
+              severity={snackbar.severity} 
+              sx={{ width: '100%' }}
             >
               {snackbar.message}
             </Alert>

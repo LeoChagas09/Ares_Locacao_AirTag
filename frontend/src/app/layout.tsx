@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-br" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="pt-br">
+      <body className={inter.className} suppressHydrationWarning={true}>
         <ThemeRegistry>
           {/* Adicionamos nossa barra de navegação aqui */}
           <ResponsiveAppBar />
