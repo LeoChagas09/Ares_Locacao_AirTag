@@ -1,10 +1,10 @@
-# 🏷️ Sistema de Gestão de Locação de AirTags - Ares
+# 🏷️ Sistema de Gestão de Locação de AirTags
 
 Sistema completo para gerenciamento de locação de dispositivos AirTag, desenvolvido com **Node.js/Express** no backend, **Next.js** no frontend e **PostgreSQL** como banco de dados.
 
 ## 📋 Sobre o Projeto
 
-O **Ares** é um sistema de gestão desenvolvido para facilitar o controle de locação de dispositivos AirTag. O sistema permite:
+O Projeto é um sistema de gestão desenvolvido para facilitar o controle de locação de dispositivos AirTag. O sistema permite:
 
 - **Gestão de Clientes**: Cadastro, edição e listagem de clientes
 - **Gestão de Dispositivos**: Controle de AirTags disponíveis com identificação por MAC Address
